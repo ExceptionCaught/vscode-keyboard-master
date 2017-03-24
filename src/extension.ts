@@ -1,12 +1,9 @@
 'use strict';
 import * as vscode from 'vscode';
-import {KeyBindingChanger} from './KeyBindingChanger';
+import {keyBindingChanger} from './KeyBindingChanger';
 
 export function activate(context: vscode.ExtensionContext) {
-
-    console.log('Congratulations, your extension "vscode-keyboard-master" is now active!');
-    var bindingChanger = new KeyBindingChanger;
-    let disposable = vscode.commands.registerCommand('extension.keyboardMaster', bindingChanger.keyChanger);
+    let disposable = vscode.commands.registerCommand('extension.keyboardMaster', keyBindingChanger);
 
     context.subscriptions.push(disposable);
 }

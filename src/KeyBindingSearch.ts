@@ -1,13 +1,14 @@
-import {FsHelper} from "./FsHelper";
+import {defaultBindings} from "./resources/defaultBindings";
 
 export class KeyBindingSearch {
 
-    constructor(private fsHelper: FsHelper){
+    constructor(){
     }
 
     searchKey(keyToSearch: string) {
-        let keyBindings = this.fsHelper.readJsonFile('./resources/defaultBindings.json');
-        return '';
+        let keyBindingsJson = defaultBindings();
+        var searchResult = keyBindingsJson.filter(element => element.key.startsWith(keyToSearch));
+        return '1\n2';
 
     }
 }
