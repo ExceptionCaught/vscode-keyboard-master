@@ -1,20 +1,10 @@
 'use strict';
-import {window} from 'vscode';
-import {KeyBindingSearch} from './KeyBindingSearch';
+import {window, QuickPickItem} from 'vscode';
+import {defaultBindings} from "./resources/defaultBindings";
+import {KeyBindQuickPickItem} from "./KeyBindQuickPickItem";
 
-export class KeyBindingChanger {
-    constructor(private keyBindingSearch : KeyBindingSearch){
-
-    }
-    keyChanger() {
-        window.showInputBox({validateInput: this.validateInput})
-        .then((keyBindingValue) => {
-
-        });
-    }
-
-    private validateInput(textValue: string){
-        return this.keyBindingSearch.searchKey(textValue);
-    }
-    
+export function keyBindingChanger() {
+    var quickItemList = defaultBindings().map(element => new KeyBindQuickPickItem(element.key, element.command, 'when' in element ? element['when'] : ' '));
+    window.showQuickPick(quickItemList, {matchOnDescription:true})
+    .then(selectedKeyBinding => console.log(selectedKeyBinding));
 }
