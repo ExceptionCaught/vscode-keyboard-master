@@ -14,7 +14,10 @@ export function keyBindingChanger() {
     let userKeyBindingList : IKeyBindConfig[] = getUserKeyBindingArray();
     userKeyBindingList.map(element => element.when = element.when ? element.when + ' (user setting)' : '(user setting)');
     let combinedList = _.union(userKeyBindingList, defaultKeyBindingList);
-    let keybindingsList = combinedList.map(element => new KeyBindQuickPickItem(element.key, element.command, (element.when) ? element.when : ' '));
+    let keybindingsList = combinedList.map(element => new KeyBindQuickPickItem(element.key, element.command, element.when));
+    userKeyBindingList.map(element => element.when = element.when.replace('(user setting)', '').trim();
+    userKeyBindingList.map(element => if (element.when === '') {element.when = null}) ;
+
     window.showQuickPick(keybindingsList, {matchOnDescription:true})
     .then(function(selectedQuickItem){
         if (selectedQuickItem){
@@ -22,21 +25,45 @@ export function keyBindingChanger() {
             .then(function(inputValue){
                 var selectedKeyBinding = combinedList.filter(element => element.key === selectedQuickItem.label && element.command === selectedQuickItem.description)[0];
                 selectedKeyBinding.key = inputValue;
-                updateNewKeyBinding(selectedKeyBinding, userKeyBindingList);
+                updateNewKeyBinding(selectedKeyBinding, userKeyBindingList)
+                .then(function(saveResult) {
+                    if (saveResult === true){
+                        window.showInformationMessage('key binding for ' + selectedKeyBinding.command + ' has been changed to ' + selectedKeyBinding.key);
+                    }
+                });
             });
         }        
     });
 }
 
 function updateNewKeyBinding(newKeyBinding: IKeyBindConfig, existingUserKey : IKeyBindConfig[]){
-        let newArray : IKeyBindConfig[] = new Array();
-        newArray.push(newKeyBinding);
-        let updatedUserKey = _.unionWith(newArray, existingUserKey, (arrValue :IKeyBindConfig, otherValue :IKeyBindConfig) => {
-            return arrValue.command === otherValue.command && (arrValue.when) ? arrValue.when === otherValue.when : true;
-        });
+    if (newKeyBinding.when){
+        newKeyBinding.when = newKeyBinding.when.replace('(user setting)', '').trim() ;
+        if (newKeyBinding.when === ''){
+            newKeyBinding.when = null;
+        }
+    }
+        
+    let newArray : IKeyBindConfig[] = new Array();
+    newArray.push(newKeyBinding);
+    let updatedUserKey = _.unionWith(newArray, existingUserKey, (arrValue :IKeyBindConfig, otherValue :IKeyBindConfig) => {
+        return arrValue.command === otherValue.command && (arrValue.when) ? arrValue.when.replace('(user setting)', '').trim() === otherValue.when : true;
+    });
 
-        var newUserKeyBinding = JSON.stringify(updatedUserKey, null, 4);
-        fs.writeFileSync(userSettingPath, newUserKeyBinding, 'utf-8' );
+    var newUserKeyBinding = JSON.stringify(updatedUserKey, null, 4);
+
+    return new Promise<boolean>((resolve, reject) => {
+        fs.writeFile(userSettingPath, newUserKeyBinding, 'utf-8', (error) => {
+            if (error){
+                console.log(error);
+                reject(false);
+            }
+            resolve(true);
+            
+        });
+        
+    });
+        
 }
 
 function getUserKeyBindingArray (){
