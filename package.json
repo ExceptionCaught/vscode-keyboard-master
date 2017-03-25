@@ -36,6 +36,8 @@
     "@types/mocha": "^2.2.32"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.58",
+    "lodash": "^4.17.4",
     "node-json-minify": "^1.0.0",
     "vscode-uri": "^1.0.0"
   }
