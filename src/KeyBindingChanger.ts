@@ -1,42 +1,56 @@
 'use strict';
 import {window, QuickPickItem, workspace, commands} from 'vscode';
 import {defaultBindings} from "./resources/defaultBindings";
-import {KeyBindQuickPickItem} from "./KeyBindQuickPickItem";
+import {KeyBindQuickPickItem} from "./models/KeyBindQuickPickItem";
+import {IKeyBindConfig} from "./models/IKeyBindConfig";
 import Uri from "vscode-uri";
 import * as fs from "fs";
+import * as _ from "lodash";
 var jsonMinify = require('node-json-minify');
+let userSettingPath = process.env.APPDATA + '\\Code\\User\\keybindings.json';
 
 export function keyBindingChanger() {
-    var defaultKeyBindingList = defaultBindings();
-    var keybindingsList = defaultKeyBindingList.map(element => new KeyBindQuickPickItem(element.key, element.command, 'when' in element ? element['when'] : ' '));
+    let defaultKeyBindingList : IKeyBindConfig[] = defaultBindings();
+    let userKeyBindingList : IKeyBindConfig[] = getUserKeyBindingArray();
+    userKeyBindingList.map(element => element.when = element.when ? element.when + ' (user setting)' : '(user setting)');
+    let combinedList = _.union(userKeyBindingList, defaultKeyBindingList);
+    let keybindingsList = combinedList.map(element => new KeyBindQuickPickItem(element.key, element.command, (element.when) ? element.when : ' '));
     window.showQuickPick(keybindingsList, {matchOnDescription:true})
     .then(function(selectedQuickItem){
         if (selectedQuickItem){
             window.showInputBox({placeHolder: 'change key binding for ' + selectedQuickItem.description + ', currently: ' + selectedQuickItem.label})
             .then(function(inputValue){
-                var selectedKeyBinding = defaultKeyBindingList.filter(element => element.key === selectedQuickItem.label && element.command === selectedQuickItem.description)[0];
+                var selectedKeyBinding = combinedList.filter(element => element.key === selectedQuickItem.label && element.command === selectedQuickItem.description)[0];
                 selectedKeyBinding.key = inputValue;
-                updateNewKeyBinding(selectedKeyBinding);
+                updateNewKeyBinding(selectedKeyBinding, userKeyBindingList);
             });
         }        
     });
 }
-function updateNewKeyBinding(newKeyBinding: any){
-    let userSettingPath = process.env.APPDATA + '\\Code\\User\\keybindings.json';
-    fs.exists(userSettingPath, (doesUserKeyFileExists) => {
-        if (doesUserKeyFileExists == false) {
-            fs.closeSync(fs.openSync(userSettingPath, 'w'));
-        }
-        var userSettingString = jsonMinify(fs.readFileSync(userSettingPath, 'utf-8'));
-        var userKeyBindings : object [];
-        try{
-            userKeyBindings = JSON.parse(userSettingString);
-        }
-        catch(exception){
-            userKeyBindings = new Array();
-        }
-        userKeyBindings.push(newKeyBinding);
-        var newUserKeyBinding = JSON.stringify(userKeyBindings, null, 4);
+
+function updateNewKeyBinding(newKeyBinding: IKeyBindConfig, existingUserKey : IKeyBindConfig[]){
+        let newArray : IKeyBindConfig[] = new Array();
+        newArray.push(newKeyBinding);
+        let updatedUserKey = _.unionWith(newArray, existingUserKey, (arrValue :IKeyBindConfig, otherValue :IKeyBindConfig) => {
+            return arrValue.command === otherValue.command && (arrValue.when) ? arrValue.when === otherValue.when : true;
+        });
+
+        var newUserKeyBinding = JSON.stringify(updatedUserKey, null, 4);
         fs.writeFileSync(userSettingPath, newUserKeyBinding, 'utf-8' );
-    })
+}
+
+function getUserKeyBindingArray (){
+    var userKeyBindings : IKeyBindConfig[];
+    if (!fs.existsSync(userSettingPath)){
+        fs.closeSync(fs.openSync(userSettingPath, 'w'));
+    }
+    var userSettingString = jsonMinify(fs.readFileSync(userSettingPath, 'utf-8'));
+    try{
+        userKeyBindings = JSON.parse(userSettingString);
+    }
+    catch(exception){
+        userKeyBindings = new Array();
+    }
+
+    return userKeyBindings;
 }
