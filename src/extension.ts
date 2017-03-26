@@ -4,7 +4,7 @@ import {keyBindingChanger} from './KeyBindingChanger';
 
 export function activate(context: vscode.ExtensionContext) {
     let systemPlatform = process.platform;
-    if (systemPlatform === 'win32'){
+    if (systemPlatform === 'win32' || systemPlatform === 'darwin'){
         let disposable = vscode.commands.registerCommand('extension.keyboardMaster', keyBindingChanger);
         context.subscriptions.push(disposable);        
     }
