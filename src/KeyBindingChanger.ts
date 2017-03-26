@@ -15,8 +15,8 @@ export function keyBindingChanger() {
     userKeyBindingList.map(element => element.when = element.when ? element.when + ' (user setting)' : '(user setting)');
     let combinedList = _.union(userKeyBindingList, defaultKeyBindingList);
     let keybindingsList = combinedList.map(element => new KeyBindQuickPickItem(element.key, element.command, element.when));
-    userKeyBindingList.map(element => element.when = element.when.replace('(user setting)', '').trim();
-    userKeyBindingList.map(element => if (element.when === '') {element.when = null}) ;
+    userKeyBindingList.map(element => element.when = element.when.replace('(user setting)', '').trim());
+    userKeyBindingList.map(element => {if (element.when === '') {element.when = undefined}});
 
     window.showQuickPick(keybindingsList, {matchOnDescription:true})
     .then(function(selectedQuickItem){
@@ -40,7 +40,7 @@ function updateNewKeyBinding(newKeyBinding: IKeyBindConfig, existingUserKey : IK
     if (newKeyBinding.when){
         newKeyBinding.when = newKeyBinding.when.replace('(user setting)', '').trim() ;
         if (newKeyBinding.when === ''){
-            newKeyBinding.when = null;
+            newKeyBinding.when = undefined;
         }
     }
         
