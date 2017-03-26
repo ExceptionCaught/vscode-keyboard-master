@@ -8,6 +8,9 @@ import * as fs from "fs";
 import * as _ from "lodash";
 var jsonMinify = require('node-json-minify');
 let userSettingPath = process.env.APPDATA + '\\Code\\User\\keybindings.json';
+if (process.platform === 'darwin'){
+    userSettingPath = process.env.HOME + '/Library/Application Support/Code/User/keybindings.json';
+}
 
 export function keyBindingChanger() {
     let defaultKeyBindingList : IKeyBindConfig[] = defaultBindings();
