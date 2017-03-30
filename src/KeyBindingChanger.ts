@@ -1,6 +1,8 @@
 'use strict';
 import {window, QuickPickItem, workspace, commands} from 'vscode';
 import {defaultBindings} from "./resources/defaultBindings";
+import {defaultBindingsMac} from "./resources/defaultBindingsMac";
+import {defaultBindingsLinux} from "./resources/defaultBindingsLinux";
 import {KeyBindQuickPickItem} from "./models/KeyBindQuickPickItem";
 import {IKeyBindConfig} from "./models/IKeyBindConfig";
 import Uri from "vscode-uri";
@@ -8,12 +10,19 @@ import * as fs from "fs";
 import * as _ from "lodash";
 var jsonMinify = require('node-json-minify');
 let userSettingPath = process.env.APPDATA + '\\Code\\User\\keybindings.json';
+let defaultKeyBindingList : IKeyBindConfig[] = defaultBindings();
+
 if (process.platform === 'darwin'){
     userSettingPath = process.env.HOME + '/Library/Application Support/Code/User/keybindings.json';
+    defaultKeyBindingList = defaultBindingsMac();
+}
+if (process.platform === 'linux'){
+    userSettingPath = process.env.HOME + '/.config/Code/User/keybindings.json';
+    defaultKeyBindingList = defaultBindingsLinux();
 }
 
+
 export function keyBindingChanger() {
-    let defaultKeyBindingList : IKeyBindConfig[] = defaultBindings();
     let userKeyBindingList : IKeyBindConfig[] = getUserKeyBindingArray();
     userKeyBindingList.map(element => element.when = element.when ? element.when + ' (user setting)' : '(user setting)');
     let combinedList = _.union(userKeyBindingList, defaultKeyBindingList);
