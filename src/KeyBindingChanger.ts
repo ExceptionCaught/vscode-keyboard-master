@@ -35,14 +35,16 @@ export function keyBindingChanger() {
         if (selectedQuickItem){
             window.showInputBox({placeHolder: 'change key binding for ' + selectedQuickItem.description + ', currently: ' + selectedQuickItem.label})
             .then(function(inputValue){
-                var selectedKeyBinding = combinedList.filter(element => element.key === selectedQuickItem.label && element.command === selectedQuickItem.description)[0];
-                selectedKeyBinding.key = inputValue;
-                updateNewKeyBinding(selectedKeyBinding, userKeyBindingList)
-                .then(function(saveResult) {
-                    if (saveResult === true){
-                        window.showInformationMessage('key binding for ' + selectedKeyBinding.command + ' has been changed to ' + selectedKeyBinding.key);
-                    }
-                });
+                if (inputValue){
+                    var selectedKeyBinding = combinedList.filter(element => element.key === selectedQuickItem.label && element.command === selectedQuickItem.description)[0];
+                    selectedKeyBinding.key = inputValue;
+                    updateNewKeyBinding(selectedKeyBinding, userKeyBindingList)
+                    .then(function(saveResult) {
+                        if (saveResult === true){
+                            window.showInformationMessage('key binding for ' + selectedKeyBinding.command + ' has been changed to ' + selectedKeyBinding.key);
+                        }
+                    });
+                }
             });
         }        
     });

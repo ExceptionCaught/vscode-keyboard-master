@@ -20,7 +20,15 @@
         "command": "extension.keyboardMaster",
         "title": "KeyBoard Master"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "extension.keyboardMaster",
+        "key": "ctrl+k ctrl+b",
+        "mac": "cmd+k ctrl+b"
+        }
     ]
+
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
