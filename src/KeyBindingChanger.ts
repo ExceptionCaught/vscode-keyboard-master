@@ -8,16 +8,17 @@ import {IKeyBindConfig} from "./models/IKeyBindConfig";
 import Uri from "vscode-uri";
 import * as fs from "fs";
 import * as _ from "lodash";
-var jsonMinify = require('node-json-minify');
-let userSettingPath = process.env.APPDATA + '\\Code\\User\\keybindings.json';
+let jsonMinify = require('node-json-minify');
+let baseKeybindingFilePath = '/Code/User/keybindings.json';
+let userSettingPath = process.env.APPDATA + baseKeybindingFilePath;
 let defaultKeyBindingList : IKeyBindConfig[] = defaultBindings();
 
 if (process.platform === 'darwin'){
-    userSettingPath = process.env.HOME + '/Library/Application Support/Code/User/keybindings.json';
+    userSettingPath = process.env.HOME + '/Library/Application Support' + baseKeybindingFilePath;
     defaultKeyBindingList = defaultBindingsMac();
 }
 if (process.platform === 'linux'){
-    userSettingPath = process.env.HOME + '/.config/Code/User/keybindings.json';
+    userSettingPath = process.env.HOME + '/.config' + baseKeybindingFilePath;
     defaultKeyBindingList = defaultBindingsLinux();
 }
 
